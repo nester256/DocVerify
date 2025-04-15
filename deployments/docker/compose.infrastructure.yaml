@@ -1,0 +1,48 @@
+services:
+  database:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES__USER}
+      - POSTGRES_PASSWORD=${POSTGRES__PASSWORD}
+      - POSTGRES_DB=${POSTGRES__DATABASE}
+    healthcheck:
+      test: pg_isready -U ${POSTGRES__USER} -d ${POSTGRES__DATABASE}
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    ports:
+      # Запрещено использовать в проде
+      - "${POSTGRES__PORT}:${DOCKER__POSTGRES_PORT}"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - docs_network
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    ports:
+      # Запрещено использовать в проде
+      - "${MINIO__PORT}:${MINIO__PORT}"
+      - "${MINIO__WEB_PORT}:${MINIO__WEB_PORT}"
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO__LOGIN}
+      MINIO_SECRET_KEY: ${MINIO__PASSWORD}
+      MINIO_CONSOLE_PORT_NUMBER: ${MINIO__WEB_PORT}
+    volumes:
+      - minio-data:/data
+    command: server /data --address ":${MINIO__PORT}" --console-address ":${MINIO__WEB_PORT}"
+    networks:
+      - docs_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${MINIO__PORT}/minio/health/live" ]
+      interval: 10s
+      timeout: 3s
+      retries: 7
+
+volumes:
+  pg-data:
+  minio-data:
+

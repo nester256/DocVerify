@@ -1,0 +1,34 @@
+include:
+  - ./compose.logging.yaml
+  - ./compose.infrastructure.yaml
+
+services:
+  gateway:
+    env_file:
+      - ../../conf/.env
+    restart: unless-stopped
+    build:
+      context: ../..
+      args:
+        SERVICE: gateway
+      dockerfile: deployments/docker/service.prod.Dockerfile
+    command: ./scripts/startup.sh -m -l
+    ports:
+    # Запрещено использовать в проде
+      - "8001:8001"
+    volumes:
+      - ../..:/code
+    depends_on:
+      database:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    labels:
+      logging: "grafana"
+    networks:
+      - docs_network
+
+networks:
+  docs_network:
+    driver: bridge
+    external: True  # Нельзя использовать в проде!

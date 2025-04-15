@@ -1,0 +1,56 @@
+[project]
+name = "doc-verify"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14.0",
+    "alembic-postgresql-enum>=1.3.0",
+    "asyncpg>=0.30.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "sqlalchemy-mixins>=2.0.5",
+    "sqlakeyset>=2.0.1726021475",
+    "orjson>=3.10.11",
+    "pydantic>=2.9.2",
+    "pydantic-settings>=2.6.1",
+    "uvicorn>=0.32.0",
+    "fastapi>=0.115.4",
+    "prometheus-client>=0.21.0",
+    "pyyaml>=6.0.2",
+    "taskiq>=0.11.10",
+    "aio-pika>=9.5.4",
+    "aiofiles>=24.1.0",
+    "pip>=24.3.1",
+    "taskiq-aio-pika>=0.4.1",
+    "miniopy-async>=1.21.1",
+    "python-multipart>=0.0.20",
+    "pillow>=11.1.0",
+    "hachoir>=3.1.3",
+    "fpdf>=1.7.2",
+    "types-pyyaml>=6.0.12.20250402",
+    "types-aiofiles>=24.1.0.20250326",
+]
+
+[dependency-groups]
+dev = [
+    "fire>=0.7.0",
+    "isort>=5.13.2",
+    "mypy>=1.13.0",
+    "ruff>=0.7.2",
+]
+
+
+[tool.ruff]
+line-length = 127
+show-fixes = true
+
+[tool.mypy]
+plugins = ['pydantic.mypy']
+#plugins = ['pydantic.mypy', 'sqlalchemy.ext.mypy.plugin'] - https://github.com/sqlalchemy/sqlalchemy/discussions/9364
+ignore_missing_imports = true
+strict = true
+platform = "linux"
+implicit_optional = true
+check_untyped_defs = true
+exclude = ['test', '.test', './test', 'migrations']

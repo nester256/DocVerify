@@ -1,0 +1,18 @@
+version: "3"
+
+includes:
+  docker:
+    taskfile: ./deployments/docker/Taskfile.yaml
+    dir: ./deployments/docker
+    optional: true
+
+dotenv:
+  - .env
+
+tasks:
+  check:
+    cmds:
+      - isort .
+      - ruff check . --fix
+      - ruff format .
+      - mypy .

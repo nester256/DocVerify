@@ -1,0 +1,25 @@
+server {
+    # Перенаправление с HTTP на HTTPS
+    listen 80;
+    server_name asd-zxc.ru www.asd-zxc.ru;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    # Настройка HTTPS
+    listen 443 ssl;
+    server_name asd-zxc.ru www.asd-zxc.ru;
+
+    # Укажите пути к сертификатам
+    ssl_certificate /etc/ssl/certs/certificate.crt;
+    ssl_certificate_key /etc/ssl/certs/certificate.key;
+    ssl_trusted_certificate /etc/ssl/certs/certificate_ca.crt;
+
+    # Дополнительные настройки SSL
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # Настройки для React-приложения
+    root /var/www/react-app;
+    index index.html;

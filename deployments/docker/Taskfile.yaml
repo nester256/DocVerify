@@ -1,0 +1,19 @@
+version: "3"
+
+tasks:
+  up:
+    cmds:
+      - docker compose -p docverify --env-file ../../conf/.env up -d --build {{.CLI_ARGS}}
+
+  down:
+    cmds:
+      - docker compose -p docverify --env-file ../../conf/.env down {{.CLI_ARGS}}
+
+  restart:
+    cmds:
+      - task: down
+      - task: up
+
+  restart-service:
+    cmds:
+      - docker compose -p docverify --env-file ../../conf/.env up -d --build gateway
