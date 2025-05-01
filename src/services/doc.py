@@ -1,4 +1,3 @@
-import asyncio
 import tempfile
 from io import BytesIO
 
@@ -6,7 +5,8 @@ from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.integrations.logger import logger
-from src.integrations.minio import get_document_public_url, upload_document_to_minio
+from src.integrations.minio import upload_document_to_minio
+from src.utils.generate_pdf import generate_pdf_from_data_async
 
 from ..models.document import Document
 from ..repositories.doc import DocumentRepository
@@ -19,32 +19,15 @@ from ..schema.info.doc import (
     DocumentSignedResponse,
     DocumentValidationResponse,
 )
-from ..utils.generate_pdf import generate_pdf_from_data
 from ..utils.pagination import get_total_pages, page_to_limit_offset
 
 
 class DocumentService:
     @staticmethod
     async def create(dto: DocumentCreateDTO, session: AsyncSession) -> DocumentCreatedResponse:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-            path = tmp_file.name
-            await asyncio.to_thread(generate_pdf_from_data, dto.model_dump(), path)
-
-        hash_ = await DocumentRepository.calculate_sha256(path)
-
-        with open(path, "rb") as f:
-            file_data = BytesIO(f.read())
-
-        storage_key = await upload_document_to_minio(file_data)
-        link_to_download = get_document_public_url(storage_key)
-
-        doc = await DocumentRepository.create(session, hash_, storage_key)
-
-        return DocumentCreatedResponse(
-            id=doc.id,
-            original_document_hash=doc.original_document_hash,
-            link_to_download=link_to_download,
-        )
+        doc = await DocumentRepository.create(session=session, status="pending")
+        await generate_pdf_from_data_async.kiq(data=dto.data, version=dto.version, doc_id=doc.id)
+        return DocumentCreatedResponse(id=doc.id, status="pending")
 
     @staticmethod
     async def sign(original_file: UploadFile, signed_file: UploadFile, session: AsyncSession) -> DocumentSignedResponse:

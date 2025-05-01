@@ -42,7 +42,24 @@ services:
       timeout: 3s
       retries: 7
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      # Запрещено использовать в проде
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      # Запрещено использовать в проде
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - docs_network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pg-data:
   minio-data:
-

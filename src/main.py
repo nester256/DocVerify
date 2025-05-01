@@ -11,6 +11,7 @@ from .api.v1.docs.router import docs_router
 from .integrations.metrics.metrics import metrics
 from .integrations.metrics.middleware import prometheus_metrics
 from .on_startup.logger import setup_logger
+from .utils.broker import broker
 
 
 def setup_middleware(app: FastAPI) -> None:
@@ -39,6 +40,7 @@ def setup_routers(app: FastAPI) -> None:
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("START APP")
     setup_logger()
+    await broker.startup()
     yield
     logger.info("END APP")
 

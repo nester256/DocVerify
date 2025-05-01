@@ -3,14 +3,13 @@ from src.schema.base import Base, PageMixin
 
 class DocumentCreateDTO(Base):
     title: str
-    content: str
-    version: str | None = None
+    data: dict  # type: ignore
+    version: int = 0
 
 
 class DocumentCreatedResponse(Base):
     id: int
-    original_document_hash: str
-    link_to_download: str | None = None
+    status: str
 
 
 class DocumentSignedResponse(Base):
@@ -24,10 +23,11 @@ class DocumentValidationResponse(Base):
 
 class DocumentGetDTO(Base):
     id: int
-    original_document_hash: str
-    original_document_path: str
+    original_document_hash: str | None = None
+    original_document_path: str | None = None
     signed_document_hash: str | None = None
     signed_document_path: str | None = None
+    status: str
     is_signed: bool
 
 

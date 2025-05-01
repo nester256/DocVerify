@@ -2,7 +2,7 @@ import hashlib
 from typing import Any, Optional, Sequence
 
 import aiofiles
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.document import Document
@@ -12,8 +12,24 @@ from src.schema.info.doc import DocumentFilters
 
 class DocumentRepository(Repository):
     @staticmethod
-    async def create(session: AsyncSession, hash_: str, minio_path: str) -> Document:
-        doc = Document(original_document_hash=hash_, original_document_path=minio_path, is_signed=False)
+    async def update_generated_data(
+        session: AsyncSession, doc_id: int, new_hash: str | None, new_path: str | None, status: str
+    ) -> None:
+        stmt = (
+            update(Document)
+            .where(Document.id == doc_id)
+            .values(
+                original_document_hash=new_hash,
+                original_document_path=new_path,
+                status=status,
+            )
+        )
+        await session.execute(stmt)
+        await session.commit()
+
+    @staticmethod
+    async def create(session: AsyncSession, status: str) -> Document:
+        doc = Document(status=status, is_signed=False)
         session.add(doc)
         await session.commit()
         await session.refresh(doc)

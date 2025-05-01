@@ -11,13 +11,11 @@ services:
       context: ../..
       args:
         SERVICE: gateway
-      dockerfile: deployments/docker/service.prod.Dockerfile
+      dockerfile: deployments/docker/gateway.prod.Dockerfile
     command: ./scripts/startup.sh -m -l
     ports:
     # Запрещено использовать в проде
       - "8001:8001"
-    volumes:
-      - ../..:/code
     depends_on:
       database:
         condition: service_healthy
@@ -28,7 +26,28 @@ services:
     networks:
       - docs_network
 
+  worker:
+    env_file:
+      - ../../conf/.env
+    environment:
+      - PYTHONPATH=/code
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: deployments/docker/worker.prod.Dockerfile
+    command: ./scripts/startworker.sh -m -l
+    ports:
+    # Только для метрик
+      - "9000:9000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    labels:
+      logging: "grafana"
+    networks:
+      - docs_network
+
 networks:
   docs_network:
     driver: bridge
-    external: True  # Нельзя использовать в проде!
+    external: True  # Нельзя использовать в проде
