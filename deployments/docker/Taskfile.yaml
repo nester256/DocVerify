@@ -14,6 +14,6 @@ tasks:
       - task: down
       - task: up
 
-  restart-service:
+  restart-services:
     cmds:
-      - docker compose -p docverify --env-file ../../conf/.env up -d --build gateway
+      - docker compose -p docverify --env-file ../../conf/.env up -d --build gateway worker
